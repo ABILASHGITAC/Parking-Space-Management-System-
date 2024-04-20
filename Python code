@@ -1,0 +1,141 @@
+import mysql.connector
+mydb=mysql.connector.connect(host="127.0.0.1",user="root",password="root",database='parkingproject') 
+mycursor=mydb.cursor()
+
+
+def Menu():
+    """
+    Use Case:
+    Displays a menu of options for the user to choose from and calls the corresponding function
+    based on the user's input.
+    """
+    print("Enter 1 : To Add Parking Details")
+    print("Enter 2 : To View Parking Details")
+    print("Enter 3 : To Remove Parking Record")
+    print("Enter 4 : To exit")
+    input_dt = int(input("Please Select An Above Option: "))
+    if input_dt== 1:
+        Add_Record()
+    elif input_dt== 2:
+        Rec_View()
+    elif input_dt== 3:
+        remove()
+    elif input_dt== 4:
+        exit()
+    else:
+        print("Invalid option entered...")
+        runAgain()
+
+
+    
+def Add_Record():
+    """
+    Use Case:
+    Allows users to add parking details such as slot number, name, vehicle number, mobile number,
+    date, time, and duration of parking. Calculates the payment based on the number of days and
+    inserts the record into the MySQL database.
+    """
+    L =[]
+    slot=int(input("Enter the parking Slot number : "))
+    L.append(slot)
+    name=str(input("Enter Your Name: "))
+    L.append(name)
+    vehicleno=input("Enter the Vehicle Number : ")
+    L.append(vehicleno)
+    Mobile=int(input("Enter Your PhoneNumber:"))
+    L.append(Mobile)    
+    date=input("Enter the date your are parking in the format of dd-mm-yyyy:")
+    L.append(date)
+    time=input("Enter the Current Time in the format of HH:MM :")
+    L.append(time)
+    nod=int(input("Enter total number of days for parking: "))
+    L.append(nod)
+    payment = 20*nod
+    print("Payment: ",payment)
+    L.append(payment)
+    sql='insert into parkingspace(slot ,name ,vehicleno , Mobile, date, time, nod, payment) values(%s,%s,%s,%s,%s,%s,%s,%s)'
+    mycursor.execute(sql,L)
+    mydb.commit()
+    del(L)
+    if_record = input("If you want to add more parking details(yes/no):")
+    if if_record.lower()=='yes':
+        Add_Record()
+    else :
+        print("Thank You")
+        
+def Rec_View():
+    """
+    Use Case:
+    Allows users to view parking details based on different search criteria such as slot number,
+    mobile number, or vehicle number. Retrieves the records from the database and displays them.
+    """
+    print("Select the search criteria : ")
+    print("1. Slot Number")
+    print("2. Your Mobile Number")
+    print("3. Your Vehicle Number")
+    ch=int(input("Enter the choice : "))
+
+    if ch==1:
+        s=int(input("Enter Parking Slot ID : "))
+        rl=[s]
+        sql="select * from parkingspace where slot=%s"
+        mycursor.execute(sql,rl)
+        res=mycursor.fetchall()
+
+    elif ch==2:
+        s=input("Enter Your Mobile Number : ")
+        rl=[s]
+        sql="select * from parkingspace where Mobile=%s"
+        mycursor.execute(sql,rl)
+        res=mycursor.fetchall()
+
+    elif ch==3:
+        s=int(input("Enter Your Vehicle Number : "))
+        rl=[s]
+        sql="select * from parkingspace where vehicleno=%s"
+        mycursor.execute(sql,rl)
+        res=mycursor.fetchall()
+        
+    for x in res:
+        print('Parking Slot Id :',x[0])
+        print('Your Name :',x[1])
+        print('Vehicle Number :',x[2])
+        print('Mobile Number :',x[3])
+        print('Date when you Parked :',x[4])
+        print('Time when you Parked :',x[5])
+        print('Number of days for parking :',x[6])
+        print('Payment :',x[7])
+    print('Thank You')
+    rl.pop()
+    if_view = input("If you want to view more parking details(yes/no):")
+    if if_view.lower()=='yes':
+        Rec_View()
+
+def remove():
+    """
+    Use Case:
+    Allows users to remove parking records based on the vehicle number. Deletes the record from
+    the MySQL database.
+    """
+    vid=input("Enter the vehicle number of the vehicle to be deleted : ")
+    Y = [vid]
+    sql="Delete from parkingspace  where vehicleno=%s"
+    mycursor.execute(sql,Y)
+    mydb.commit()
+    print('The Vehicle is gone from Parking space')
+    Y.pop()
+    if_remove = input("If you want to delete more vehicle details(yes/no):")
+    if if_remove.lower()=='yes':
+        remove()
+        
+def exit():
+    """
+    Use Case:
+    Closes the cursor and the database connection when the user chooses to exit the program.
+    """
+    mycursor.close()
+    mydb.close()
+    print("Thankyou!!!")
+    
+Menu()
+
